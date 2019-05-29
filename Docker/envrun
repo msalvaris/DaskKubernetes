@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Small script that sets up environment from values in .env file before execution
+export $(grep -v '^#' /workspace/.env | xargs)
+eval "$@"

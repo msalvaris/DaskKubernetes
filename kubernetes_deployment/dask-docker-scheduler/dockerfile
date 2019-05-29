@@ -1,0 +1,33 @@
+FROM continuumio/miniconda3:4.5.11 as base
+
+# Dumb init
+RUN wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64
+RUN chmod +x /usr/local/bin/dumb-init
+
+RUN conda update conda
+COPY kubernetes_deployment/dask-docker-scheduler/requirements.txt .
+
+RUN conda install --yes \
+    -c conda-forge \
+    -c pytorch \
+    --file requirements.txt \
+	&& conda clean -tipsy
+
+COPY common_scripts/prepare.sh /usr/bin/prepare.sh
+RUN chmod +x /usr/bin/prepare.sh
+RUN mkdir /opt/app
+
+ENTRYPOINT ["/usr/local/bin/dumb-init", "/usr/bin/prepare.sh"]
+
+FROM base as style_transfer
+
+RUN mkdir /python_libs
+COPY src/style_transfer /python_libs/style_transfer
+ENV PYTHONPATH /python_libs:/python_libs/style_transfer:$PYTHONPATH
+
+FROM base as maskrcnn
+RUN mkdir /python_libs
+COPY src/maskrcnn /python_libs/maskrcnn
+ENV PYTHONPATH /python_libs:/python_libs/maskrcnn:$PYTHONPATH
+
+

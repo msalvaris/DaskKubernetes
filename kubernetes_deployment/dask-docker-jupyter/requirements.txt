@@ -1,0 +1,12 @@
+python-blosc
+cytoolz
+dask==1.0.0
+nomkl
+numpy==1.15.4
+pandas==0.23.4
+pyyaml
+pytorch-nightly
+torchvision-cpu==0.2.2
+ipywidgets
+jupyterlab==0.35
+cudatoolkit=9.0

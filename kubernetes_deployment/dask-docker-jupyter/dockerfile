@@ -1,0 +1,97 @@
+FROM jupyter/base-notebook as base
+
+WORKDIR /
+USER root
+RUN apt-get update \
+  && apt-get install -yq --no-install-recommends graphviz git vim \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+USER $NB_USER
+
+RUN conda update conda
+COPY kubernetes_deployment/dask-docker-jupyter/requirements.txt .
+
+RUN conda install --yes \
+    -c conda-forge \
+    -c pytorch \
+    --file requirements.txt \
+	&& conda clean -tipsy
+
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager dask-labextension@0.2
+
+RUN pip install graphviz \
+                --no-cache-dir \
+                --no-dependencies
+
+USER root
+COPY common_scripts/prepare.sh /usr/bin/prepare.sh
+RUN chmod +x /usr/bin/prepare.sh
+RUN mkdir /opt/app
+
+USER $NB_USER
+
+ENTRYPOINT ["tini", "--", "/usr/bin/prepare.sh"]
+CMD ["start.sh", "jupyter", "lab"]
+
+FROM base as style_transfer
+
+USER root
+
+RUN apt-get update -y \
+ && apt-get install -y \
+	ffmpeg
+
+RUN mkdir /python_libs
+COPY src/style_transfer /python_libs/style_transfer
+USER $NB_USER
+
+ENV PYTHONPATH /python_libs:/python_libs/style_transfer:$PYTHONPATH
+WORKDIR $HOME
+COPY notebooks/StyleTransferDemo.ipynb $HOME
+
+FROM base as maskrcnn
+USER root
+WORKDIR /
+RUN apt-get update -y \
+ && apt-get install -y \
+ 	apt-utils \
+ 	cmake \
+ 	tree \
+ 	htop \
+ 	bmon \
+ 	iotop \
+ 	g++ \
+	jq \
+	ffmpeg
+
+RUN conda install -y conda-build
+RUN conda install -y opencv -c menpo && \
+	conda clean -ya
+
+RUN pip install cython ninja yacs
+
+# install pycocotools
+RUN cd / \
+ && git clone https://github.com/cocodataset/cocoapi.git \
+ && cd cocoapi/PythonAPI \
+ && python setup.py build_ext install
+
+# install apex
+RUN git clone https://github.com/NVIDIA/apex.git \
+ && cd apex \
+ && pip install -v --no-cache-dir .
+
+
+RUN cd / \
+ && git clone https://github.com/facebookresearch/maskrcnn-benchmark.git \
+ && cd maskrcnn-benchmark \
+ && python setup.py build develop
+
+
+RUN mkdir /python_libs
+COPY src/maskrcnn /python_libs/maskrcnn
+ENV PYTHONPATH /python_libs:/python_libs/maskrcnn:$PYTHONPATH
+USER $NB_USER
+WORKDIR $HOME
+COPY notebooks/MaskRCNNDaskDemo.ipynb $HOME
+

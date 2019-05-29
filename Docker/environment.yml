@@ -1,0 +1,20 @@
+name: py36
+channels:
+ - conda-forge
+dependencies:
+  - python=3.6
+  - tornado<6
+  - jupyter
+  - pyyaml
+  - ipykernel
+  - matplotlib
+  - seaborn
+  - dask
+  - mpi4py
+  - pip
+  - pip:
+    - docker
+    - invoke
+    - python-dotenv==0.10.2
+    - tabulate==0.8.3
+    

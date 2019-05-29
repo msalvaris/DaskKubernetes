@@ -1,0 +1,8 @@
+LOG_CONFIG=logging.conf
+SUBSCRIPTION_ID=""
+RESOURCE_GROUP=daskaksrg
+REGION=eastus
+AKS_NAME=daskaks
+ACCOUNT_NAME=daskaksstorage
+ACCOUNT_KEY=""
+DATA=
