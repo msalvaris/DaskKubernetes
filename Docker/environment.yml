@@ -3,14 +3,6 @@ channels:
  - conda-forge
 dependencies:
   - python=3.6
-  - tornado<6
-  - jupyter
-  - pyyaml
-  - ipykernel
-  - matplotlib
-  - seaborn
-  - dask
-  - mpi4py
   - pip
   - pip:
     - docker

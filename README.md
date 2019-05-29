@@ -5,9 +5,9 @@ This repo contains a demonstration on how to score Deep Learning models on GPU u
 
 It uses Azure Kubernetes Services but other cloud providers can be added (PRs welcome :))
 ## Prerequisites
-Azure account
-Linux VM/PC
-Docker
+Azure account  
+Linux VM/PC  
+Docker  
 
 > **Note:**
 > You will need to run docker without sudo, to do this run:

@@ -3,11 +3,12 @@ Usage:
     make help                   show this message
     make build                  build docker image
     make push-dask				build and push images that will be used by Kubernetes and are reference in helm file
-	setup 						runs both build and push-dask
+	make setup 					runs both build and push-dask
+	make run					runs the control plane container and starts bash
+	make stop					stop and remove control plane container
 endef
 export PROJECT_HELP_MSG
 PWD:=$(shell pwd)
-PORT:=9999
 NAME:=dask-playground # Name of running container
 
 include .env
@@ -80,14 +81,14 @@ setup: build push-dask
 
 run: # Run docker locally for dev and control
 	docker run $(local_volumes) \
-			   --name $(NAME) \
-	           -d \
-	           -v /var/run/docker.sock:/var/run/docker.sock \
-			   -v ${HOME}/.bash_history:/root/.bash_history \
-	           -e PYTHONPATH=/workspace:$$PYTHONPATH \
-			   -e HIST_FILE=/root/.bash_history \
-			   -e TAG=$(tag) \
-	           -it $(image_name)
+				--name $(NAME) \
+				-d \
+				-v /var/run/docker.sock:/var/run/docker.sock \
+				-v ${HOME}/.bash_history:/root/.bash_history \
+				-e PYTHONPATH=/workspace:$$PYTHONPATH \
+				-e HIST_FILE=/root/.bash_history \
+				-e TAG=$(tag) \
+				-it $(image_name)
 
 	$(docker_exec) bash
 

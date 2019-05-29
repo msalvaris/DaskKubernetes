@@ -1,10 +1,4 @@
-FROM nvidia/cuda:9.0-devel-ubuntu16.04
-
-ENV CUDNN_VERSION=7.0.5.15-1+cuda9.0
-ENV NCCL_VERSION=2.2.13-1+cuda9.0
-
-RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
-
+FROM ubuntu:16.04
 
 RUN apt-get update && apt-get install -y --no-install-recommends --allow-downgrades --allow-change-held-packages \
         build-essential \
@@ -19,22 +13,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends --allow-downgra
         locales \
         apt-transport-https \
         software-properties-common \
-        libcudnn7=${CUDNN_VERSION} \
-        libnccl2=${NCCL_VERSION} \
-        libnccl-dev=${NCCL_VERSION} \
         libjpeg-dev \
         libpng-dev \
         tmux
 
-       
-
-# Install Docker
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
-	apt-key fingerprint 0EBFCD88 && \ 
-	add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-   						$(lsb_release -cs) \
-   						stable" &&\
-   	apt-get update && apt-get install -y --no-install-recommends docker-ce
+# # Install Docker
+# RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
+# 	apt-key fingerprint 0EBFCD88 && \ 
+# 	add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+#    						$(lsb_release -cs) \
+#    						stable" &&\
+#    	apt-get update && apt-get install -y --no-install-recommends docker-ce
    
    
 RUN locale-gen en_US.UTF-8
@@ -56,18 +45,6 @@ RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-la
      echo "conda activate $ENV_NAME" >> ~/.bashrc
 ENV PATH /opt/conda/envs/$ENV_NAME/bin:/opt/conda/bin:$PATH
 
-# Install Open MPI
-RUN mkdir /tmp/openmpi && \
-    cd /tmp/openmpi && \
-    wget https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz && \
-    tar zxf openmpi-3.0.0.tar.gz && \
-    cd openmpi-3.0.0 && \
-    ./configure --enable-orterun-prefix-by-default && \
-    make -j $(nproc) all && \
-    make install && \
-    ldconfig && \
-    rm -rf /tmp/openmpi
-
 # Install Azure CLI
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ xenial main" | \
     tee /etc/apt/sources.list.d/azure-cli.list && \
@@ -78,11 +55,7 @@ RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ xenia
     apt-get install -y --no-install-recommends \
     azure-cli
 
-RUN az extension add -y -s \
-	https://azuremlsdktestpypi.blob.core.windows.net/wheels/sdk-release/Preview/E7501C02541B433786111FE8E140CAA1/azure_cli_ml-0.1.74-py2.py3-none-any.whl \
-	--pip-extra-index-urls  https://azuremlsdktestpypi.azureedge.net/sdk-release/Preview/E7501C02541B433786111FE8E140CAA1
-
-
+RUN az extension add -n azure-cli-ml # Install azure ml extension
 
 # Install AzCopy
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod/ xenial main" > azure.list &&\
@@ -93,41 +66,6 @@ RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu
 
 COPY jupyter_notebook_config.py /root/.jupyter/
 COPY tmux.conf /root/.tmux.conf
-
-# Create a wrapper for OpenMPI to allow running as root by default
-RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
-    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
-    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
-    chmod a+x /usr/local/bin/mpirun
-
-# Configure OpenMPI to run good defaults:
-#   --bind-to none --map-by slot --mca btl_tcp_if_exclude lo,docker0
-RUN echo "hwloc_base_binding_policy = none" >> /usr/local/etc/openmpi-mca-params.conf && \
-    echo "rmaps_base_mapping_policy = slot" >> /usr/local/etc/openmpi-mca-params.conf
-
-
-# Set default NCCL parameters
-RUN echo NCCL_DEBUG=INFO >> /etc/nccl.conf && \
-    echo NCCL_SOCKET_IFNAME=^docker0 >> /etc/nccl.conf
-
-# Install OpenSSH for MPI to communicate between containers
-RUN apt-get install -y --no-install-recommends openssh-client openssh-server && \
-    mkdir -p /var/run/sshd
-
-# Allow OpenSSH to talk to containers without asking for confirmation
-RUN cat /etc/ssh/ssh_config | grep -v StrictHostKeyChecking > /etc/ssh/ssh_config.new && \
-    echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config.new && \
-    mv /etc/ssh/ssh_config.new /etc/ssh/ssh_config
-
-COPY envrun /usr/local/bin
-COPY bashrc_extras .
-
-# Set environment variables from .env file
-RUN mkdir /workspace && \
-	touch /workspace/.env && \
-	cat bashrc_extras>>~/.bashrc
-
-RUN chmod 777 /usr/local/bin/envrun
 
 SHELL ["/bin/bash", "-c"]
 
