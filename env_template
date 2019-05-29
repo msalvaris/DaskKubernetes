@@ -6,3 +6,4 @@ AKS_NAME=daskaks
 ACCOUNT_NAME=daskaksstorage
 ACCOUNT_KEY=""
 DATA=
+CONTAINER_REGISTRY=

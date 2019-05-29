@@ -1,4 +1,4 @@
-# Batch scoring of Deep Learning models using Dask on Kubernets
+# Batch scoring of Deep Learning models using Dask on Kubernetes
 This repo contains a demonstration on how to score Deep Learning models on GPU using Dask and Kubernetes. The repo contains two scenarios:  
 1.  Take a movie, split it into multiple images and run a simple [style transfer model](https://github.com/pytorch/examples/tree/master/fast_neural_style) on each of the images. Then stich the result back together to make a movie.  
 2.  Take a movie, split it into multiple images and run [Mask-RCNN model](https://github.com/facebookresearch/maskrcnn-benchmark) over each image. Then stitch the resulting images together to make a movie.
@@ -16,17 +16,23 @@ Docker
 > newgrp docker 
 >```
 
+
 ## Setup
 Once you have cloned the repo, you will need to create a .env file from [env_template](env_template)
 Feel free to adjust any of the names for any of the resources. Don't worry about filling in the subscription id and account key these will be filled in by the scripts.
-You need to specify the data location which should be the absolute location on your VM or PC that you want mapped as a volume inside your control plane container.
+You need to specify the data (DATA variable) location which should be the absolute location on your VM or PC that you want mapped as a volume inside your control plane container.
+You will also need to specify the container registry to use (CONTAINER_REGISTRY variable). This will be the registry used to host the images used on Kubernetes.
+
+> **Note:**
+> You will need to have logged in to your container registry account to be able to push the images to it
+>
 
 ```bash
 make setup
 ```
 
 This will create the docker images used in the repo and push them to the specified container registry:
-1. Control plane image which holds the scripts we will use to orchestrate everything
+1. Control plane image which holds the environment we will use to orchestrate everything
 2. Image that will be used for the Dask worker
 3. Image used for Dask Scheduler
 4. Image used for our Jupyter Lab service
