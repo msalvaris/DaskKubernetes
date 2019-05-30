@@ -16,7 +16,7 @@ include .env
 image_name:=$(CONTAINER_REGISTRY)/dask-playground
 local_volumes:=-v $(PWD):/workspace \
 			   -v $(DATA):/data
-tag:=version_.009
+tag:=version_.01
 docker_exec:=docker exec -it $(NAME)
 
 help:

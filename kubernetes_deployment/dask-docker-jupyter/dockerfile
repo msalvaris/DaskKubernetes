@@ -43,11 +43,12 @@ RUN apt-get update -y \
 
 RUN mkdir /python_libs
 COPY src/style_transfer /python_libs/style_transfer
+COPY notebooks/StyleTransferDemo.ipynb $HOME
+RUN chown ${NB_USER}:users $HOME/StyleTransferDemo.ipynb
 USER $NB_USER
-
 ENV PYTHONPATH /python_libs:/python_libs/style_transfer:$PYTHONPATH
 WORKDIR $HOME
-COPY notebooks/StyleTransferDemo.ipynb $HOME
+
 
 FROM base as maskrcnn
 USER root
@@ -91,7 +92,9 @@ RUN cd / \
 RUN mkdir /python_libs
 COPY src/maskrcnn /python_libs/maskrcnn
 ENV PYTHONPATH /python_libs:/python_libs/maskrcnn:$PYTHONPATH
+COPY notebooks/MaskRCNNDaskDemo.ipynb $HOME
+RUN chown ${NB_USER}:users $HOME/MaskRCNNDaskDemo.ipynb
 USER $NB_USER
 WORKDIR $HOME
-COPY notebooks/MaskRCNNDaskDemo.ipynb $HOME
+
 

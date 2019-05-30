@@ -127,9 +127,9 @@ def upload_from_local(c, source, destination, destination_container):
     """Upload local file or foler to container in premium blob 
     
     Args:
-        source (string): File or folder found in /data that you want transfered to blob storage
-        destination (string): Corresponding filename or foldername to have it transfered to in blob storage
-        destination_container (string): Container to upload the source to
+        source (str): File or folder found in /data that you want transfered to blob storage
+        destination (str): Corresponding filename or foldername to have it transfered to in blob storage
+        destination_container (str): Container to upload the source to
     """
     c.invoke_execute(
         c, "storage.create_container", container_name=destination_container
@@ -167,14 +167,19 @@ _MOVIES = (
         filename="climbing.mp4",
     ),
     Movie(
-        sas="https://happypathspremium.blob.core.windows.net/movies/climbing.mp4?st=2019-05-27T13%3A14%3A10Z&se=2030-05-28T13%3A14%3A00Z&sp=rl&sv=2018-03-28&sr=b&sig=zwrdFPZo%2F8z9eb12HndzvA020X3MOGDgUmHIlDJwp8Y%3D",
-        filename="climbing.mp4",
+        sas="https://happypathspremium.blob.core.windows.net/movies/people_10.mp4?st=2019-05-30T07%3A57%3A02Z&se=2030-05-31T07%3A57%3A00Z&sp=rl&sv=2018-03-28&sr=b&sig=gbyC50EbB8SJjUgO0Bc8YWfm5eAIIh4vqBq%2FCNZu4ms%3D",
+        filename="people_10.mp4",
     ),
 )
 
 
 @task
 def copy_movies(c, destination_container):
+    """Copies demo movies to own storage
+    
+    Args:
+        destination_container (str): Name of the container to copy the movies to
+    """
     c.invoke_execute(
         c, "storage.create_container", container_name=destination_container
     )
