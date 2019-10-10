@@ -24,7 +24,7 @@ def get_services(c):
 
 @task
 def install_nvidia(c):
-    c.run("kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v1.11/nvidia-device-plugin.yml", pty=True)
+    c.run("kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v1.12/nvidia-device-plugin.yml", pty=True)
 
 @task
 def install_blob(c):

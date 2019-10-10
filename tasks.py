@@ -73,7 +73,7 @@ def login(c):
 
 def _registered_container_services(c):
     cmd_results = c.run(f"az provider show -n Microsoft.ContainerService", pty=True)
-    cmd_dict = json.loads(cmd_results.stdout)
+    cmd_dict = json.loads(cmd_results.stdout.strip('\x1b[0m'))
     return cmd_dict["registrationState"] == "Registered"
 
 
@@ -134,7 +134,7 @@ def aks_create(
         f"--node-count {node_count} "
         f"--generate-ssh-keys "
         f"-s  {vm_type} "
-        f"--kubernetes-version 1.11.8 "
+        f"--kubernetes-version 1.13.10 "
     )  
     c.run(cmd, pty=True)
 
