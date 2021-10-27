@@ -1,6 +1,6 @@
 python-blosc
 cytoolz
-dask==1.0.0
+dask==2021.10.0
 nomkl
 numpy==1.15.4
 pandas==0.23.4
